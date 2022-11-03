@@ -1,4 +1,4 @@
-import {afterEach, expect, it, jest} from '@jest/globals';
+import {afterEach, expect, it, vi} from 'vitest';
 
 import mockAxios from "../lib/index";
 import UppercaseProxy from "./UppercaseProxy";
@@ -10,8 +10,8 @@ afterEach(() => {
 });
 
 it("UppercaseProxy should get data from the server and convert it to UPPERCASE", () => {
-    const catchFn = jest.fn();
-    const thenFn = jest.fn();
+    const catchFn = vi.fn();
+    const thenFn = vi.fn();
 
     // using the component, which should make a server response
     const clientMessage = "client is saying hello!";
@@ -42,7 +42,7 @@ it("UppercaseProxy should get data from the server and convert it to UPPERCASE",
 });
 
 it("UppercaseProxy should catch errors", () => {
-    console.log = jest.fn();
+    console.log = vi.fn();
 
     // using the component, which should make a server response
     const clientMessage = "client is saying hello!";

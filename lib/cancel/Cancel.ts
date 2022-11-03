@@ -3,7 +3,7 @@
  * Copyright (c) 2014-present Matt Zabriskie (MIT License)
  */
 export class Cancel {
-  public __CANCEL__: boolean;
+  public __CANCEL__: boolean = true;
 
   constructor(public message = "Cancel") {}
 
@@ -11,7 +11,5 @@ export class Cancel {
     return this.message;
   }
 }
-
-Cancel.prototype.__CANCEL__ = true;
 
 export default Cancel;

@@ -1,13 +1,13 @@
-import {describe, expect, it, jest} from '@jest/globals';
+import { describe, expect, it, vi } from 'vitest';
 
 import MockAxios from "../lib/index";
 import { getData } from "./cancel";
 import Cancel from "../lib/cancel/Cancel";
 
 describe("cancel", () => {
-    it("cancels request (shouldCancel = true)", (done) => {
-        const thenFn = jest.fn();
-        const catchFn = jest.fn();
+    it("cancels request (shouldCancel = true)", () => new Promise(done => {
+        const thenFn = vi.fn();
+        const catchFn = vi.fn();
         const promise = getData(true).then(thenFn).catch(catchFn)
 
         setTimeout(async () => {
@@ -17,11 +17,11 @@ describe("cancel", () => {
             expect(catchFn).toHaveBeenCalledWith(expect.any(Cancel))
             done()
         })
-    })
+    }))
 
-    it("does not cancel request (shouldCancel = false)", (done) => {
-        const thenFn = jest.fn();
-        const catchFn = jest.fn();
+    it("does not cancel request (shouldCancel = false)", () => new Promise(done => {
+        const thenFn = vi.fn();
+        const catchFn = vi.fn();
         const promise = getData(false).then(thenFn).catch(catchFn)
 
         setTimeout(async () => {
@@ -31,5 +31,5 @@ describe("cancel", () => {
             expect(catchFn).not.toHaveBeenCalled()
             done()
         })
-    })
+    }))
 })

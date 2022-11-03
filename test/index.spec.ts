@@ -1,4 +1,4 @@
-import {afterEach, beforeEach, describe, expect, it, jest} from '@jest/globals';
+import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 
 import { SynchronousPromise } from "synchronous-promise";
 import MockAxios from "../lib/index";
@@ -50,7 +50,7 @@ describe("MockAxios", () => {
     describe("mockResponse", () => {
         // mockResponse - Simulate a server response, (optionally) with the given data
         it("`mockResponse` should resolve the given promise with the provided response", () => {
-            const thenFn = jest.fn();
+            const thenFn = vi.fn();
             MockAxios.post().then(thenFn);
 
             const responseData = { data: { text: "some data" } };
@@ -73,9 +73,9 @@ describe("MockAxios", () => {
         });
 
         it("`mockResponse` should resolve the provided promise", () => {
-            const firstFn = jest.fn();
-            const secondFn = jest.fn();
-            const thirdFn = jest.fn();
+            const firstFn = vi.fn();
+            const secondFn = vi.fn();
+            const thirdFn = vi.fn();
 
             MockAxios.post().then(firstFn);
             const secondPromise = MockAxios.post();
@@ -102,9 +102,9 @@ describe("MockAxios", () => {
             const secondPromise = MockAxios.post();
             const thirdPromise = MockAxios.post();
 
-            const firstThen = jest.fn();
-            const secondThen = jest.fn();
-            const thirdThen = jest.fn();
+            const firstThen = vi.fn();
+            const secondThen = vi.fn();
+            const thirdThen = vi.fn();
 
             firstPromise.then(firstThen);
             secondPromise.then(secondThen);
@@ -144,7 +144,7 @@ describe("MockAxios", () => {
         });
 
         it("`mockResponse` should work when used with async / await", async () => {
-            const thenFn = jest.fn();
+            const thenFn = vi.fn();
             const promise = MockAxios.post().then(thenFn);
 
             const responseData = { data: { text: "some data" } };
@@ -158,7 +158,7 @@ describe("MockAxios", () => {
     describe("mockResponseFor", () => {
         it("`mockResponseFor` should get the correct request using the shortcut", () => {
             const url = "url";
-            const thenFn = jest.fn();
+            const thenFn = vi.fn();
             MockAxios.post(url).then(thenFn);
             MockAxios.get("otherurl");
             MockAxios.mockResponseFor(url);
@@ -167,7 +167,7 @@ describe("MockAxios", () => {
 
         it("`mockResponseFor` should get the correct request when axios() ist called directly", () => {
             const url = "url";
-            const thenFn = jest.fn();
+            const thenFn = vi.fn();
             MockAxios.post("otherurl");
             MockAxios(url).then(thenFn);
             MockAxios.mockResponseFor(url);
@@ -176,7 +176,7 @@ describe("MockAxios", () => {
 
         it("`mockResponseFor` should get the correct request", () => {
             const url = "url";
-            const thenFn = jest.fn();
+            const thenFn = vi.fn();
             MockAxios.post(url).then(thenFn);
             MockAxios.get(url);
             MockAxios.mockResponseFor({ url, method: "post" });
@@ -192,7 +192,7 @@ describe("MockAxios", () => {
 
         it("`mockResponseFor` should not throw an error if no matching request can be found but silentMode", () => {
             const url = "url";
-            const thenFn = jest.fn();
+            const thenFn = vi.fn();
             MockAxios.post("otherurl").then(thenFn);
             expect(() => MockAxios.mockResponseFor({ url, method: "post" }, { data: {} }, true)).not.toThrow();
             expect(thenFn).not.toHaveBeenCalled();
@@ -202,8 +202,8 @@ describe("MockAxios", () => {
     describe("mockError", () => {
         // mockError - Simulate an error in server request
         it("`mockError` should fail the given promise with the provided response", () => {
-            const thenFn = jest.fn();
-            const catchFn = jest.fn();
+            const thenFn = vi.fn();
+            const catchFn = vi.fn();
             const promise = MockAxios.post();
             promise.then(thenFn).catch(catchFn);
 
@@ -215,8 +215,8 @@ describe("MockAxios", () => {
         });
 
         it("`mockError` should mark error as an axios error", () => {
-            const thenFn = jest.fn();
-            const catchFn = jest.fn();
+            const thenFn = vi.fn();
+            const catchFn = vi.fn();
             const promise = MockAxios.post();
             promise.then(thenFn).catch(catchFn);
 
@@ -233,9 +233,9 @@ describe("MockAxios", () => {
         });
 
         it("`mockError` fail the provided promise", () => {
-            const firstFn = jest.fn();
-            const secondFn = jest.fn();
-            const thirdFn = jest.fn();
+            const firstFn = vi.fn();
+            const secondFn = vi.fn();
+            const thirdFn = vi.fn();
 
             MockAxios.post().catch(firstFn);
             const secondPromise = MockAxios.post();
@@ -254,9 +254,9 @@ describe("MockAxios", () => {
             const secondPromise = MockAxios.post();
             const thirdPromise = MockAxios.post();
 
-            const firstFn = jest.fn();
-            const secondFn = jest.fn();
-            const thirdFn = jest.fn();
+            const firstFn = vi.fn();
+            const secondFn = vi.fn();
+            const thirdFn = vi.fn();
 
             firstPromise.catch(firstFn);
             secondPromise.catch(secondFn);
@@ -298,7 +298,7 @@ describe("MockAxios", () => {
         it("`mockError` should pass down the error object", () => {
             class CustomError extends Error { }
             const promise = MockAxios.post();
-            const catchFn = jest.fn();
+            const catchFn = vi.fn();
             promise.catch(catchFn);
 
             MockAxios.mockError(new CustomError("custom error"));
@@ -548,16 +548,16 @@ describe("MockAxios", () => {
         beforeEach(() => {
             MockAxios.reset();
         });
-    
+
         it("executes interceptors on request", () => {
-            const interceptor = jest.fn(c => c);
+            const interceptor = vi.fn(c => c);
             MockAxios.interceptors.request.use(interceptor);
             MockAxios.post();
             expect(interceptor).toHaveBeenCalled();
         });
 
         it("executes interceptors on response", () => {
-            const interceptor = jest.fn(r => r);
+            const interceptor = vi.fn(r => r);
             MockAxios.interceptors.response.use(interceptor);
             MockAxios.post();
             MockAxios.mockResponse({ data: "my_data" });
@@ -565,8 +565,8 @@ describe("MockAxios", () => {
         });
 
         it("handles errors in interceptors", async () => {
-            const errorHandler = jest.fn();
-            const errorInterceptor = jest.fn((e) => Promise.reject(e));
+            const errorHandler = vi.fn();
+            const errorInterceptor = vi.fn((e) => Promise.reject(e));
             MockAxios.interceptors.response.use((d) => d, errorInterceptor);
             MockAxios.post().catch(errorHandler);
             MockAxios.mockError({ data: "my_data" });

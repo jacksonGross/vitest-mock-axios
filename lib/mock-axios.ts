@@ -1,12 +1,12 @@
 /**
- * TypeScript version of Axios mock for unit testing with [Jest](https://facebook.github.io/jest/).
+ * TypeScript version of Axios mock for unit testing with [Vitest](https://vitest.dev/).
  * This file is based on https://gist.github.com/tux4/36006a1859323f779ab0
  *
- * @author   knee-cola <nikola.derezic@gmail.com>
+ * @author   jacksonGross <jackson.gross@gmail.com>
  * @license  @license MIT License, http://www.opensource.org/licenses/MIT
  */
 
-import {jest} from '@jest/globals';
+import { vi } from 'vitest';
 
 import { SynchronousPromise, UnresolvedSynchronousPromise } from "synchronous-promise";
 import Cancel from "./cancel/Cancel";
@@ -79,56 +79,56 @@ const _helperReqNoData = (method: string, url: string, config?: any) => {
     return _helperReq(method, url, {}, config)
 }
 
-const MockAxios: AxiosMockType = (jest.fn(_newReq) as unknown) as AxiosMockType;
+const MockAxios: AxiosMockType = (vi.fn(_newReq) as unknown) as AxiosMockType;
 
 // mocking Axios methods
 // @ts-ignore
-MockAxios.get = jest.fn(_helperReqNoData.bind(null, "get"));
+MockAxios.get = vi.fn(_helperReqNoData.bind(null, "get"));
 // @ts-ignore
-MockAxios.post = jest.fn(_helperReq.bind(null, "post"));
+MockAxios.post = vi.fn(_helperReq.bind(null, "post"));
 // @ts-ignore
-MockAxios.put = jest.fn(_helperReq.bind(null, "put"));
+MockAxios.put = vi.fn(_helperReq.bind(null, "put"));
 // @ts-ignore
-MockAxios.patch = jest.fn(_helperReq.bind(null, "patch"));
+MockAxios.patch = vi.fn(_helperReq.bind(null, "patch"));
 // @ts-ignore
-MockAxios.delete = jest.fn(_helperReqNoData.bind(null, "delete"));
+MockAxios.delete = vi.fn(_helperReqNoData.bind(null, "delete"));
 // @ts-ignore
-MockAxios.request = jest.fn(_newReq);
+MockAxios.request = vi.fn(_newReq);
 // @ts-ignore
-MockAxios.all = jest.fn((values) => Promise.all(values));
+MockAxios.all = vi.fn((values) => Promise.all(values));
 // @ts-ignore
-MockAxios.head = jest.fn(_helperReqNoData.bind(null, "head"));
+MockAxios.head = vi.fn(_helperReqNoData.bind(null, "head"));
 // @ts-ignore
-MockAxios.options = jest.fn(_helperReqNoData.bind(null, "options"));
+MockAxios.options = vi.fn(_helperReqNoData.bind(null, "options"));
 // @ts-ignore
-MockAxios.create = jest.fn(() => MockAxios);
+MockAxios.create = vi.fn(() => MockAxios);
 
 MockAxios.interceptors = {
     request: {
         // @ts-ignore
-        use: jest.fn((onFulfilled, onRejected) => {
+        use: vi.fn((onFulfilled, onRejected) => {
             return _requestInterceptors.push({ onFulfilled, onRejected })
         }),
         // @ts-ignore
-        eject: jest.fn((position: number) => {
+        eject: vi.fn((position: number) => {
             _requestInterceptors.splice(position - 1, 1);
         }),
         // @ts-ignore
-        clear: jest.fn(() => {
+        clear: vi.fn(() => {
             _requestInterceptors.length = 0;
         }),
     },
     response: {
         // @ts-ignore
-        use: jest.fn((onFulfilled, onRejected) => {
+        use: vi.fn((onFulfilled, onRejected) => {
             return _responseInterceptors.push({onFulfilled, onRejected});
         }),
         // @ts-ignore
-        eject: jest.fn((position: number) => {
+        eject: vi.fn((position: number) => {
             _responseInterceptors.splice(position - 1, 1);
         }),
         // @ts-ignore
-        clear: jest.fn(() => {
+        clear: vi.fn(() => {
             _responseInterceptors.length = 0;
         }),
     },
