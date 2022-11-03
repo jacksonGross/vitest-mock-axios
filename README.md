@@ -1,50 +1,76 @@
 # What's this?
-This is a light-weight, easy to use synchronous [Axios](https://github.com/axios/axios) mock for unit testing with [Jest](https://facebook.github.io/jest/).
+This is a light-weight, easy to use synchronous [Axios](https://github.com/axios/axios) mock for unit testing with [Vitest](https://vitest.dev/).
 
 ## Why would I use it?
 Because it works synchronously, meaning that your tests will be easier to write, read and understand.
 
 ## Can it be used with Jasmine/Mocha?
-Unfortunately *out of the box* this mock works only with [Jest](https://facebook.github.io/jest/).
+Unfortunately *out of the box* this mock works only with [Vitest](https://vitest.dev/).
 
-However, if you look at the [source code](https://github.com/knee-cola/jest-mock-axios/blob/master/lib/mock-axios.ts), you can see that it uses Jest only to define spies (for methods `post`, `get`, `put`, `patch`, `delete`, `create`, `all`, `head`, `options`, `request`). This means that it can easily be modified to use any other testing framework - go to [GitHub](https://github.com/knee-cola/jest-mock-axios), clone it, modify it, play with it :)
+However, if you look at the [source code](https://github.com/jacksonGross/vitest-mock-axios/blob/master/lib/mock-axios.ts), you can see that it uses Vitest only to define spies (for methods `post`, `get`, `put`, `patch`, `delete`, `create`, `all`, `head`, `options`, `request`). This means that it can easily be modified to use any other testing framework - go to [GitHub](https://github.com/jacksonGross/vitest-mock-axios), clone it, modify it, play with it :)
 
 # What's in this document?
-* [Installation](#installation)
-  * [Why do we need to manually create the mock?](#why-do-we-need-to-manually-create-the-mock)
-* [Basic example](#basic-example)
-* [Axios mock API](#axios-mock-api)
-  * [axios.mockResponse](#axiosmockresponseresponse-requestinfo-silentmode)
-  * [axios.mockResponseFor](#axiosmockresponseforcriteria-response-silentmode)
-  * [axios.mockError](#axiosmockerrorerr-requestinfo)
-  * [axios.lastReqGet](#axioslastreqget)
-  * [axios.getReqByMatchUrl](#axiosgetreqbymatchurlregexurl)
-  * [axios.getReqByRegex](#axiosgetreqbyregexopts)
-  * [axios.lastPromiseGet](#axioslastpromiseget)
-  * [axios.reset](#axiosreset)
-* [Additional examples](#additional-examples)
-  * [Values returned by `lastReqGet` and `lastPromiseGet` methods](#values-returned-by-lastreqget-and-lastpromiseget-methods)
-  * [Resolving requests out of order](#resolving-requests-out-of-order)
-* [Missing features](#missing-features)
-* [Synchronous promise](#synchronous-promise)
+- [What's this?](#whats-this)
+  - [Why would I use it?](#why-would-i-use-it)
+  - [Can it be used with Jasmine/Mocha?](#can-it-be-used-with-jasminemocha)
+- [What's in this document?](#whats-in-this-document)
+- [Installation](#installation)
+  - [Why do we need to manually create the mock?](#why-do-we-need-to-manually-create-the-mock)
+- [Basic example](#basic-example)
+- [Axios mock API](#axios-mock-api)
+  - [axios.mockResponse(response[, requestInfo[, silentMode]])](#axiosmockresponseresponse-requestinfo-silentmode)
+    - [Arguments: `response`](#arguments-response)
+    - [Arguments: (optional) `requestInfo`](#arguments-optional-requestinfo)
+    - [Arguments: (optional) `silentMode`](#arguments-optional-silentmode)
+  - [axios.mockResponseFor(criteria, response[, silentMode])](#axiosmockresponseforcriteria-response-silentmode)
+    - [Arguments: `criteria`](#arguments-criteria)
+    - [Arguments: `response`](#arguments-response-1)
+    - [Arguments: (optional) `silentMode`](#arguments-optional-silentmode-1)
+  - [axios.mockError(err[, requestInfo])](#axiosmockerrorerr-requestinfo)
+    - [Arguments: `err`](#arguments-err)
+    - [Arguments: (optional) `requestInfo`](#arguments-optional-requestinfo-1)
+    - [Arguments: (optional) `silentMode`](#arguments-optional-silentmode-2)
+  - [axios.lastReqGet()](#axioslastreqget)
+  - [axios.getReqMatching(criteria)](#axiosgetreqmatchingcriteria)
+    - [Arguments: `criteria`](#arguments-criteria-1)
+  - [axios.getReqByUrl(url)](#axiosgetreqbyurlurl)
+    - [Arguments: `url`](#arguments-url)
+  - [axios.getReqByMatchUrl(regexUrl)](#axiosgetreqbymatchurlregexurl)
+    - [Arguments: `regexUrl`](#arguments-regexurl)
+    - [Usage](#usage)
+  - [axios.getReqByRegex(opts)](#axiosgetreqbyregexopts)
+    - [Arguments: `opts`](#arguments-opts)
+    - [Usages](#usages)
+  - [axios.lastPromiseGet()](#axioslastpromiseget)
+  - [axios.reset()](#axiosreset)
+- [Additional examples](#additional-examples)
+  - [Values returned by `lastReqGet` and `lastPromiseGet` methods](#values-returned-by-lastreqget-and-lastpromiseget-methods)
+  - [Resolving requests out of order](#resolving-requests-out-of-order)
+  - [Using `await` and `async`](#using-await-and-async)
+  - [Interceptors](#interceptors)
+  - [Cancelling requests](#cancelling-requests)
+- [Missing features](#missing-features)
+- [Synchronous promise](#synchronous-promise)
+- [Inspiration](#inspiration)
+- [License](#license)
 
 # Installation
 Installation is simple - just run:
 
-    npm i --save-dev jest-mock-axios
+    npm i --save-dev vitest-mock-axios
 
-Next you need to setup a [manual Jest mock](https://facebook.github.io/jest/docs/en/manual-mocks.html) for *Axios* (we'll explain why a bit later):
-* create `__mocks__` directory in your project root (or whatever is configured in the `roots` config in jest.config.js - when using `react-scripts` this is `<rootDir>/src`, so you need to place it under `src/__mocks__`)
+Next you need to setup a [module Vitest mock](https://vitest.dev/api/#vi-mock) for *Axios* (we'll explain why a bit later):
+* create `__mocks__` directory in your project root (or whatever is configured in the `roots` config in vite.config.js - when using `react-scripts` this is `<rootDir>/src`, so you need to place it under `src/__mocks__`)
 * inside this new directory create a files named `axios.js`
 * copy & paste the following snippets to `axios.js` file
 
 ```javascript
 // ./__mocks__/axios.js
-import mockAxios from 'jest-mock-axios';
+import mockAxios from 'vitest-mock-axios';
 export default mockAxios;
 ```
 
-⚠️ In v4.6.0 this module is inadvertently a pure ES module ([#83](https://github.com/knee-cola/jest-mock-axios/issues/83)). Please use v4.5.0 or v4.6.1 if you encounter any problems for now.
+⚠️ In v4.6.0 this module is inadvertently a pure ES module ([#83](https://github.com/jacksonGross/vitest-mock-axios/issues/83)). Please use v4.5.0 or v4.6.1 if you encounter any problems for now.
 
 ## Why do we need to manually create the mock?
 It's because Jest expects mocks to be placed in the project root, while
@@ -56,7 +82,7 @@ Let's consider that we want to test a component which uses Axios. This component
 Here's a Jest snippet, which explains how we would test this component:
 ```javascript
 // ./test/UppercaseProxy.spec.js
-import mockAxios from 'jest-mock-axios';
+import mockAxios from 'vitest-mock-axios';
 import UppercaseProxy from '../src/UppercaseProxy';
 
 afterEach(() => {
@@ -66,8 +92,8 @@ afterEach(() => {
 
 it('UppercaseProxy should get data from the server and convert it to UPPERCASE', () => {
 
-    let catchFn = jest.fn(),
-        thenFn = jest.fn();
+    let catchFn = vi.fn(),
+        thenFn = vi.fn();
 
     // using the component, which should make a server response
     let clientMessage = 'client is saying hello!';
@@ -373,8 +399,8 @@ In this example we'll create two consecutive requests before simulating a server
 ```javascript
 it('when resolving a request an appropriate handler should be called', () => {
 
-    let thenFn1 = jest.fn(),
-        thenFn2 = jest.fn();
+    let thenFn1 = vi.fn(),
+        thenFn2 = vi.fn();
 
     // creating the FIRST server request
     UppercaseProxy('client is saying hello!').then(thenFn1);
@@ -450,12 +476,12 @@ AxiosMock offers basic support for interceptors (i.e. it does not break when int
 
 ## Cancelling requests
 
-`jest-mock-axios` has basic support for cancelling requests as in axios. Please note that you will get an error if you try to mock a response for a request after it has been cancelled. Please refer to the provided [test case](https://github.com/knee-cola/jest-mock-axios/blob/master/test/cancel.spec.ts) for further usage details.
+`vitest-mock-axios` has basic support for cancelling requests as in axios. Please note that you will get an error if you try to mock a response for a request after it has been cancelled. Please refer to the provided [test case](https://github.com/jacksonGross/vitest-mock-axios/blob/master/test/cancel.spec.ts) for further usage details.
 
 # Missing features
 AxiosMock covers the most popular parts of Axios API, meaning that some of the features are missing or only partially implemented (i.e. interceptors).
 
-If you need an additional feature, you can request it by creating a new issue on [project's GitHub page](https://github.com/knee-cola/jest-mock-axios/issues/).
+If you need an additional feature, you can request it by creating a new issue on [project's GitHub page](https://github.com/jacksonGross/vitest-mock-axios/issues/).
 
 Also you are welcome to implement the missing feature yourself and make a pull request :)
 
@@ -463,7 +489,7 @@ Also you are welcome to implement the missing feature yourself and make a pull r
 The magic which enables axios mock to work synchronously is hidden away in [`synchronous-promise`](https://www.npmjs.com/package/synchronous-promise), which enables promises to be settled in synchronous manner.
 
 # Inspiration
-This mock is loosely based on the following gist: [tux4/axios-test.js](https://gist.github.com/tux4/36006a1859323f779ab0)
+This mock is loosely based on the following gist: [tux4/axios-test.js](https://gist.github.com/tux4/36006a1859323f779ab0) and a direct fork of [vitest-mock-axios](https://github.com/knee-cola/vitest-mock-axios)
 
 # License
 MIT License, [http://www.opensource.org/licenses/MIT](http://www.opensource.org/licenses/MIT)
