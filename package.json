@@ -43,6 +43,6 @@
   },
   "dependencies": {
     "synchronous-promise": "^2.0.16",
-    "vitest": "^0.24.5"
+    "vitest": "^0.31.2"
   }
 }
